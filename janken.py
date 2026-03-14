@@ -12,6 +12,11 @@ import random  # ランダムな値を生成するための標準ライブラリ
 # インデックス: 0=グー, 1=チョキ, 2=パー
 
 HANDS = ["グー", "チョキ", "パー"]
+
+# 各手に対応する絵文字を辞書で管理する。
+# 辞書(dict): { キー: 値 } の形式でデータを管理するデータ構造。
+EMOJI = {"グー": "✊", "チョキ": "✌️", "パー": "🖐️"}
+
 # ゲームを何回行うか
 ROUNDS = 3
 
@@ -49,21 +54,30 @@ draw_count   = 0
 for round_num in range(1, ROUNDS + 1):   # 1, 2, 3 の順でループ
     print(f"--- 第{round_num}回戦 ---")
 
-    # プレイヤーに手を選ばせる
-    # input() はキーボード入力を受け取り、文字列として返す
-    print("手を入力してください: グー / チョキ / パー")
-    player_hand = input("> ").strip()     # strip() で前後の空白を除去
+    # プレイヤーに手を選ばせる（番号選択式）
+    # enumerate(リスト, start=1) → (1, "グー"), (2, "チョキ"), ... のように
+    # (番号, 要素) のペアを順番に取り出せる。
+    print("手を選んでください:")
+    for num, hand in enumerate(HANDS, start=1):
+        print(f"  {num}: {EMOJI[hand]} {hand}")   # 例: "  1: ✊ グー"
 
-    # 入力値のバリデーション(正しい手かチェック)
-    if player_hand not in HANDS:
-        print(f"「{player_hand}」は無効な入力です。グーを選んだことにします。\n")
+    player_input = input("> ").strip()    # strip() で前後の空白を除去
+
+    # 入力値のバリデーション: "1"〜"3" 以外は無効
+    # player_input.isdigit() → 文字列が数字だけで構成されているか確認
+    if player_input.isdigit() and 1 <= int(player_input) <= len(HANDS):
+        choice = int(player_input) - 1   # "1"→0, "2"→1, "3"→2 (リストのインデックスに変換)
+        player_hand = HANDS[choice]
+    else:
+        print(f"「{player_input}」は無効な入力です。グーを選んだことにします。")
         player_hand = "グー"              # 無効入力時はグーに固定
 
     # CPUの手をランダムに選ぶ
     # random.choice(リスト) → リストからランダムに1つ取り出す
     cpu_hand = random.choice(HANDS)
 
-    print(f"あなた: {player_hand}  vs  CPU: {cpu_hand}")
+    # EMOJI[hand] で手名に対応する絵文字を取り出して表示
+    print(f"あなた: {EMOJI[player_hand]} {player_hand}  vs  CPU: {EMOJI[cpu_hand]} {cpu_hand}")
 
     # 勝敗判定(関数を呼び出す)
     result = judge(player_hand, cpu_hand)
